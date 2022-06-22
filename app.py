@@ -1,3 +1,4 @@
+
 from pymongo import MongoClient
 import jwt
 import datetime
@@ -12,14 +13,10 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = 'SPARTA'
-# https://www.notion.so/FAQ-a4482abaefa445bb9fd7e05e0d243d66 공통체크리스트
-# 1.aws 접속 확인
-# 2.27017 포트 추가 하기
-# 3.Mongodb 상태 확인
-# 4.mongodb https://www.mongodb.com/try/download/community 설치하기
-# 5 'mongodb://54.180.92.136'<<자신의 aws 퍼블릭Ipv4주소 추가(마지막에 서버 호스팅 담당 하는사람것 추가?
-client = MongoClient('mongodb://54.180.92.136', 27017, username="아이디", password="비밀번호")
-db = client.dbsparta_plus_week4
+
+from pymongo import MongoClient
+client = MongoClient('mongodb+srv://ju0:1234@cluster0.0pcmh.mongodb.net/?retryWrites=true&w=majority')
+db = client.dbsparta
 
 
 @app.route('/')
@@ -54,29 +51,13 @@ def user(username):
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
 
-# 4-9 로그인 서버 코드니스펫
+
 @app.route('/sign_in', methods=['POST'])
 def sign_in():
     # 로그인
-    username_receive = request.form['username_give']
-    password_receive = request.form['password_give'] #ser
+    return jsonify({'result': 'success'})
 
-    pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
-    result = db.users.find_one({'username': username_receive, 'password': pw_hash})
-
-    if result is not None:
-        payload = {
-         'id': username_receive,
-         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
-
-        return jsonify({'result': 'success', 'token': token})
-    # 찾지 못하면
-    else:
-        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
-
-# 4-8
+# 회원가입 서버
 @app.route('/sign_up/save', methods=['POST'])
 def sign_up():
     username_receive = request.form['username_give']
@@ -93,10 +74,10 @@ def sign_up():
     db.users.insert_one(doc)
     return jsonify({'result': 'success'})
 
-# 4-8   아이디 중복확인 서버
+# 아이디 중복확인
 @app.route('/sign_up/check_dup', methods=['POST'])
 def check_dup():
-    username_receive = request.form['username_give'] #request.form으로 username을 받음
+    username_receive = request.form['username_give']
     exists = bool(db.users.find_one({"username": username_receive}))
     return jsonify({'result': 'success', 'exists': exists})
 

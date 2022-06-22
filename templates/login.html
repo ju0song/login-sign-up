@@ -18,12 +18,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 
-
+    <!--        배너 css-->
     <style>
-        <!--
-        스타일 태그-- >
         body {
-            background-color: #a8636d;
+            background-color: RGBA(232, 52, 78, 0.2);
             min-height: 100vh;
         }
 
@@ -43,38 +41,69 @@
         }
 
         .is-sparta {
-            color: #a8636d !important;
+            color: #e8344e !important;
         }
+
+        /*로그인박스 CSS*/
+        .button.is-sparta {
+            background-color: #e8344e;
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .button.is-sparta.is-outlined {
+            background-color: transparent;
+            border-color: #e8344e;
+            color: #e8344e !important;
+        }
+
+        .help {
+            color: gray;
+        }
+
     </style>
-
-
     <script>
         // {% if msg %}
         //     alert("{{ msg }}")
         // {% endif %}
         function sign_in() {
-            $.ajax({
-                type: "POST",
-                url: "/sign_in",
-                data: {
-                    username_give: "",
-                    password_give: ""
-                },
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        $.cookie('mytoken', response['token'], {path: '/'});
+    let username = $("#input-username").val()
+    let password = $("#input-password").val()
 
-                        alert('로그인 완료!')
-                        window.location.href = '/'
-                    } else {
-                        // 로그인이 안되면 에러메시지를 띄웁니다.
-                        alert(response['msg'])
-                    }
-                }
-            })
+    if (username == "") {
+        $("#help-id-login").text("아이디를 입력해주세요.")
+        $("#input-username").focus()
+        return;
+    } else {
+        $("#help-id-login").text("")
+    }
+
+    if (password == "") {
+        $("#help-password-login").text("비밀번호를 입력해주세요.")
+        $("#input-password").focus()
+        return;
+    } else {
+        $("#help-password-login").text("")
+    }
+    $.ajax({
+        type: "POST",
+        url: "/sign_in",
+        data: {
+            username_give: username,
+            password_give: password
+        },
+        success: function (response) {
+            if (response['result'] == 'success') {
+                $.cookie('mytoken', response['token'], {path: '/'});
+                window.location.replace("/")
+            } else {
+                alert(response['msg'])
+            }
         }
+    });
+}
 
-        //4-8 회원가입클라이언트
+        //회원가입
         function sign_up() {
             let username = $("#input-username").val()
             let password = $("#input-password").val()
@@ -89,12 +118,11 @@
                 alert("아이디 중복확인을 해주세요.")
                 return;
             }
-            //패스워드가 빈칸인지 검사
+
             if (password == "") {
                 $("#help-password").text("비밀번호를 입력해주세요.").removeClass("is-safe").addClass("is-danger")
                 $("#input-password").focus()
                 return;
-                //    패스워드가 같은비밀번호인지
             } else if (!is_password(password)) {
                 $("#help-password").text("비밀번호의 형식을 확인해주세요. 영문과 숫자 필수 포함, 특수문자(!@#$%^&*) 사용가능 8-20자").removeClass("is-safe").addClass("is-danger")
                 $("#input-password").focus()
@@ -128,6 +156,7 @@
 
         }
 
+
         function toggle_sign_up() {
             $("#sign-up-box").toggleClass("is-hidden")
             $("#div-sign-in-or-up").toggleClass("is-hidden")
@@ -137,7 +166,7 @@
             $("#help-password2").toggleClass("is-hidden")
         }
 
-        //4-8 아이디 비밀번호 정규표현식 추가
+        //정규표현식 추가
         function is_nickname(asValue) {
             var regExp = /^(?=.*[a-zA-Z])[-a-zA-Z0-9_.]{2,10}$/;
             return regExp.test(asValue);
@@ -148,12 +177,12 @@
             return regExp.test(asValue);
         }
 
-        //4-8 아이디 중복확인 클라이언트
+        //아이디 중복확인 클라이언트
         function check_dup() {
             let username = $("#input-username").val()
             console.log(username)
-            if (username == "") { //1.만약에 유저가 값을 입력하지 않으면
-                $("#help-id").text("아이디를 입력해주세요.").removeClass("is-safe").addClass("is-danger") //입력창 아래에 텍스트가 뜬다
+            if (username == "") {
+                $("#help-id").text("아이디를 입력해주세요.").removeClass("is-safe").addClass("is-danger")
                 $("#input-username").focus()
                 return;
             }
@@ -162,7 +191,7 @@
                 $("#input-username").focus()
                 return;
             }
-            $("#help-id").addClass("is-loading") //2.아이디와 닉네임이 맞다면 DB에가서 username과 똑같은 사람이 있는지 확인한다
+            $("#help-id").addClass("is-loading")
             $.ajax({
                 type: "POST",
                 url: "/sign_up/check_dup",
@@ -171,7 +200,7 @@
                 },
                 success: function (response) {
 
-                    if (response["exists"]) { //3.서버측에서 응답
+                    if (response["exists"]) {
                         $("#help-id").text("이미 존재하는 아이디입니다.").removeClass("is-safe").addClass("is-danger")
                         $("#input-username").focus()
                     } else {
@@ -182,22 +211,20 @@
                 }
             });
         }
-
-
     </script>
 
-
 </head>
-<!--    로고   -->
+
+<!--    배너   -->
 <body>
 <section class="hero is-white">
     <div class="hero-body has-text-centered" style="padding-bottom:1rem;margin:auto;">
-        <h1 class="title is-sparta">Dev's book</h1>
-        <h3 class="subtitle is-sparta">코딩입문자들을위한 책추천사이트</h3>
+        <h1 class="title is-sparta">SWEETER</h1>
+        <h3 class="subtitle is-sparta">세상을 달달하게</h3>
     </div>
-
-    <!--    로그인박스-->
 </section>
+
+<!--로그인 박스-->
 <section class="section">
     <div class="container">
         <div class="box" style="max-width: 480px;margin:auto">
@@ -209,13 +236,12 @@
                                 <input id="input-username" class="input" type="text" placeholder="아이디">
                                 <span class="icon is-small is-left"><i class="fa fa-user"></i></span>
                             </div>
-
-                            <div id="btn-check-dup" class="control">
+                            <div id="btn-check-dup" class="control is-hidden">
                                 <button class="button is-sparta" onclick="check_dup()">중복확인</button>
                             </div>
 
                         </div>
-                        <p id="help-id" class="help">아이디는 2-10자의 영문과 숫자와 일부 특수문자(._-)만 입력 가능합니다.</p>
+                        <p id="help-id" class="help is-hidden" a>아이디는 2-10자의 영문과 숫자와 일부 특수문자(._-)만 입력 가능합니다.</p>
                         <p id="help-id-login" class="help is-danger"></p>
 
                         <div class="field">
@@ -223,8 +249,8 @@
                                 <input id="input-password" class="input" type="password" placeholder="비밀번호">
                                 <span class="icon is-small is-left"><i class="fa fa-lock"></i></span>
                             </div>
-                            <p id="help-password" class="help">영문과 숫자 조합의 8-20자의 비밀번호를 설정해주세요. 특수문자(!@#$%^&*)도 사용
-                                가능합니다.</p>
+                            <p id="help-password" class="help is-hidden">영문과 숫자 조합의 8-20자의 비밀번호를 설정해주세요. 특수문자(!@#$%^&*)도
+                                사용 가능합니다.</p>
                         </div>
 
 
@@ -255,7 +281,7 @@
                                            placeholder="비밀번호 재입력">
                                     <span class="icon is-small is-left"><i class="fa fa-lock"></i></span>
                                 </div>
-                                <p id="help-password2" class="help">비밀번호를 다시 한 번 입력해주세요.</p>
+                                <p id="help-password2" class="help is-hidden">비밀번호를 다시 한 번 입력해주세요.</p>
 
                             </div>
                         </div>
